@@ -51,18 +51,21 @@ function App() {
     for (let i = 0; i < string.length; i++) {
       arrayVazio.push(string[i]);
     }
-    console.log(arrayVazio)
     return arrayVazio;
   }
 
   let [arrayWord, setArrayWord] = useState(stringToArray(palavras[0]));
   let [image, setImage] = useState(images[0]);
-  let [rightLetters, setRightLetters] = useState([])
+  let [rightLetters, setRightLetters] = useState([]);
+  let [lettersClicked, setLettersClicked] = useState([]);
+  let [win, setWin] = useState(0)
+  let [lose, setLose] = useState(0)
 
   function wordsClicked(word) {
+    setLettersClicked([...lettersClicked, word]);
+    console.log(lettersClicked);
     if (arrayWord.includes(word)) {
       for (let i = 0; i < arrayWord.length; i++) {
-        console.log(word === arrayWord[i])
         if (word === arrayWord[i]) {
           setRightLetters([...rightLetters, word]);
         }
@@ -73,10 +76,15 @@ function App() {
   }
 
   function wrongChoice() {
-    console.log(wrong);
-    wrong++;
-    setImage(`images[${wrong}]`);
-    console.log(image);
+    if (wrong >= 5) {
+      wrong++;
+      setImage(`images[${wrong}]`);
+      setLettersClicked(alfabeto);
+      setRightLetters(arrayWord);
+    } else {
+      wrong++;
+      setImage(`images[${wrong}]`);
+    }
   }
 
   return (
@@ -88,7 +96,9 @@ function App() {
           <div className="secretWord">
             {arrayWord.map((letra, index) => (
               <li>
-                <div className={rightLetters.includes(letra) ? "" : "hidden" }>{letra}</div>
+                <div className={rightLetters.includes(letra) ? "" : "hidden"}>
+                  {letra}
+                </div>
               </li>
             ))}
           </div>
@@ -97,7 +107,16 @@ function App() {
 
       <div className="letters">
         {alfabeto.map((letra, index) => (
-          <li onClick={() => wordsClicked(letra)}>{letra}</li>
+          <ul>
+            <li
+              onClick={() =>
+                lettersClicked.includes(letra) ? "" : wordsClicked(letra)
+              }
+              className={lettersClicked.includes(letra) ? "clicked" : ""}
+            >
+              {letra}
+            </li>
+          </ul>
         ))}
       </div>
 

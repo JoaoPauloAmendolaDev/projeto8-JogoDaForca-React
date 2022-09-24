@@ -103,3 +103,8 @@
 .hidden{
     display: none;
 }
+
+.clicked{
+  background-color: rgba(124, 125, 182, 0.39)!important;
+  color: rgb(104, 102, 102)!important;
+}
