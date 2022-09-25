@@ -47,23 +47,29 @@ fisherYatesShuffle(palavras);
 
 function App() {
   function stringToArray(string) {
+    string = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let arrayVazio = [];
     for (let i = 0; i < string.length; i++) {
       arrayVazio.push(string[i]);
     }
+    console.log(string);
     return arrayVazio;
   }
 
-  let [arrayWord, setArrayWord] = useState(stringToArray(palavras[0]));
+  let [arrayWord, setArrayWord] = useState(stringToArray(""));
   let [image, setImage] = useState(images[0]);
   let [rightLetters, setRightLetters] = useState([]);
   let [lettersClicked, setLettersClicked] = useState([]);
-  let [win, setWin] = useState(0)
-  let [lose, setLose] = useState(0)
+  let [win, setWin] = useState(0);
+  let [lose, setLose] = useState(0);
+  let [res, setRes] = useState("");
 
   function wordsClicked(word) {
+
+    
     setLettersClicked([...lettersClicked, word]);
-    console.log(lettersClicked);
+
+
     if (arrayWord.includes(word)) {
       for (let i = 0; i < arrayWord.length; i++) {
         if (word === arrayWord[i]) {
@@ -75,15 +81,29 @@ function App() {
     }
   }
 
+
   function wrongChoice() {
     if (wrong >= 5) {
       wrong++;
       setImage(`images[${wrong}]`);
       setLettersClicked(alfabeto);
       setRightLetters(arrayWord);
+      setLose(true)
     } else {
       wrong++;
       setImage(`images[${wrong}]`);
+    }
+  }
+
+  function tentar(res) {
+    console.log(res === palavras[0])
+    if (res === palavras[0]) {
+      console.log("acertou!");
+      setLettersClicked(alfabeto);
+      setRightLetters(arrayWord);
+      setWin(true)
+    } else {
+      wrongChoice()
     }
   }
 
@@ -92,12 +112,14 @@ function App() {
       <div className="fatherTop">
         <img src={images[wrong]} alt="enforcado" />
         <div className="rightTop">
-          <div className="choiceWord">Escolher Palavra</div>
+          <div className="choiceWord" onClick={() => setArrayWord(stringToArray(palavras[0]))}>
+            Escolher Palavra
+          </div>
           <div className="secretWord">
             {arrayWord.map((letra, index) => (
               <li>
-                <div className={rightLetters.includes(letra) ? "" : "hidden"}>
-                  {letra}
+                <div>
+                  {rightLetters.includes(letra) ? letra :"_"}
                 </div>
               </li>
             ))}
@@ -122,8 +144,14 @@ function App() {
 
       <div className="guessBox">
         <p>Já sei a palavra!</p>
-        <input></input>
-        <div className="try">Chutar</div>
+        <input
+          type="text"
+          value={res}
+          onChange={(e) => setRes(e.target.value)}
+        ></input>
+        <div className="try" onClick={() => tentar(res)}>
+          Chutar
+        </div>
       </div>
     </>
   );
