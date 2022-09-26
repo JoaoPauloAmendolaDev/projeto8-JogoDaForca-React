@@ -35,6 +35,7 @@ const alfabeto = [
 ];
 
 let wrong = 0;
+let string = "";
 
 function fisherYatesShuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -46,8 +47,9 @@ function fisherYatesShuffle(arr) {
 fisherYatesShuffle(palavras);
 
 function App() {
-  function stringToArray(string) {
-    string = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  function stringToArray(palavra) {
+    //unclickLetters()
+    string = palavra.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let arrayVazio = [];
     for (let i = 0; i < string.length; i++) {
       arrayVazio.push(string[i]);
@@ -56,39 +58,37 @@ function App() {
     return arrayVazio;
   }
 
-  let [arrayWord, setArrayWord] = useState(stringToArray(""));
+  let [arrayWord, setArrayWord] = useState(stringToArray(palavras[0]));
   let [image, setImage] = useState(images[0]);
   let [rightLetters, setRightLetters] = useState([]);
-  let [lettersClicked, setLettersClicked] = useState([]);
-  let [win, setWin] = useState(0);
-  let [lose, setLose] = useState(0);
+  let [lettersClicked, setLettersClicked] = useState(alfabeto);
+  let [win, setWin] = useState(false);
+  let [lose, setLose] = useState(false);
   let [res, setRes] = useState("");
 
   function wordsClicked(word) {
-
-    
     setLettersClicked([...lettersClicked, word]);
-
 
     if (arrayWord.includes(word)) {
       for (let i = 0; i < arrayWord.length; i++) {
         if (word === arrayWord[i]) {
-          setRightLetters([...rightLetters, word]);
+          rightLetters.push(word);
+          console.log(rightLetters);
         }
       }
     } else {
       wrongChoice();
     }
+    setRightLetters([...rightLetters]);
+    if (rightLetters.length === arrayWord.length) {
+      winner();
+    }
   }
-
 
   function wrongChoice() {
     if (wrong >= 5) {
       wrong++;
-      setImage(`images[${wrong}]`);
-      setLettersClicked(alfabeto);
-      setRightLetters(arrayWord);
-      setLose(true)
+      loser();
     } else {
       wrong++;
       setImage(`images[${wrong}]`);
@@ -96,15 +96,35 @@ function App() {
   }
 
   function tentar(res) {
-    console.log(res === palavras[0])
-    if (res === palavras[0]) {
-      console.log("acertou!");
+    res = res.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    console.log(res);
+    console.log(string);
+    if (res === string) {
+      console.log("entrei no if da vitória");
+      winner();
+    } else {
+      console.log("entrei no if da derrota");
+      wrongChoice();
+    }
+  }
+  function unclickLetters() {
+    setLettersClicked([]);
+  }
+
+  function winner() {
+    setTimeout(() => {
       setLettersClicked(alfabeto);
       setRightLetters(arrayWord);
-      setWin(true)
-    } else {
-      wrongChoice()
-    }
+      setWin(true);
+    }, 20);
+  }
+
+  function loser() {
+    setTimeout(() => {
+      setLettersClicked(alfabeto);
+      setRightLetters(arrayWord);
+      setLose(true);
+    }, 20);
   }
 
   return (
@@ -112,14 +132,23 @@ function App() {
       <div className="fatherTop">
         <img src={images[wrong]} alt="enforcado" />
         <div className="rightTop">
-          <div className="choiceWord" onClick={() => setArrayWord(stringToArray(palavras[0]))}>
+          <div
+            className="choiceWord"
+            onClick={() => setArrayWord(stringToArray(palavras[0]))}
+          >
+            <div
+              className="liberateLetters"
+              onClick={() => unclickLetters()}
+            ></div>
             Escolher Palavra
           </div>
           <div className="secretWord">
             {arrayWord.map((letra, index) => (
               <li>
-                <div>
-                  {rightLetters.includes(letra) ? letra :"_"}
+                <div className={win == true ? "green" : ""}>
+                  <div className={lose == true ? "red" : ""}>
+                    {rightLetters.includes(letra) ? letra : "_"}
+                  </div>
                 </div>
               </li>
             ))}
@@ -149,7 +178,10 @@ function App() {
           value={res}
           onChange={(e) => setRes(e.target.value)}
         ></input>
-        <div className="try" onClick={() => tentar(res)}>
+        <div
+          className="try"
+          onClick={() => (!lose || !win || wrong == 6 ? tentar(res) : "")}
+        >
           Chutar
         </div>
       </div>
